@@ -1,0 +1,25 @@
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+.wrapper {
+	max-width: 400px;
+	white-space: nowrap;
+}
+ul {
+	list-style: none;
+	padding: 4px 22px;
+}
+ul li::after {
+	content: '';
+	clear: both;
+}
+ul li p {
+	float: left;
+	width: calc( 100% - 40px );
+}
+ul li button {
+	float: right;
+	width: 40px;
+}
