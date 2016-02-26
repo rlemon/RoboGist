@@ -35,7 +35,14 @@ function run(sdefs = []) {
 function runScripts() {
 	for( const script of store ) {
 		for( const fileName in script.files ) {
-			inject(script.files[fileName].content);
+			const maybeext = fileName.split('.').pop().toLowerCase()
+			if( maybeext === 'js') {
+				inject('script',script.files[fileName].content);
+			} else if (maybeext === 'css' ) {
+				inject('style',script.files[fileName].content, true);
+			} else {
+				console.error('script contains invalid file types.', fileName);
+			}
 		}
 	}
 }
@@ -74,8 +81,11 @@ function setStore(name, items) {
 		}
 	});
 }
-function inject(content, isHead = false) {
- 	const s = document.createElement('script');
- 	s.textContent = '(function() {' + content + '}())';
+function inject(type, content, isHead = false) {
+ 	const s = document.createElement(type);
+ 	if( type === 'js' ) { // TODO: add wrap options
+ 		contnet = '(function() {' + content + '}())'
+ 	}
+ 	s.textContent = content;
  	document[isHead?'head':'body'].appendChild(s);
 }
