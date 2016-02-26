@@ -17,9 +17,7 @@ function run(sdefs = []) {
 
 	Promise.all(pArr).then(data=> {
 		store = data.map(item=>{
-			const tmp = JSON.parse(item.responseText);
-			const ref = sdefs.shift();
-			return Object.assign(tmp, ref);
+			return JSON.parse(item.responseText);
 		});
 		runScripts();
 	});
@@ -27,16 +25,14 @@ function run(sdefs = []) {
 
 function runScripts() {
 	for( const script of store ) {
-		console.log(script);
-		for( const file of script.files ) {
-			xhr(`https://gist.githubusercontent.com/${script.owner}/${script.id}/raw/${file}`)
-				.then(hr=>inject(hr.responseText, false));
+		for( const fileName in script.files ) {
+			inject(script.files[fileName].content);
 		}
 	}
 }
 
 function lookupGist(id) {
-	return xhr(`https://gist.github.com/${id}.json`);
+	return xhr(`https://api.github.com/gists/${id}`);
 }
 
 function xhr(url, type = 'GET', data = null) {
