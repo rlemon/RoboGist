@@ -1,7 +1,19 @@
+// GLOBALS ( ͡° ͜ʖ ͡°)
+// --------------------
 const inputId = document.getElementById('gist-id');
 const inputMatches = document.getElementById('url-matches');
 const btnSave = document.getElementById('add-gist');
 const gistlist = document.getElementById('gist-list');
+let store = []; // currently active gists
+// --------------------
+
+// popup requests data from the page loading it.
+chrome.runtime.onMessage.addListener( (request, sender, done) => {
+	if( request.getActiveGists ) {
+		done({data:store});
+	}
+});
+
 
 btnSave.addEventListener('click', _=>{
 	const id = inputId.value;
@@ -20,43 +32,46 @@ btnSave.addEventListener('click', _=>{
 getStore('s_defs').then(ret=>run(ret.s_defs));
 
 function run(sdefs = []) {
-	const pArr = sdefs.map(def=>lookupGist(def.id));
+	const pArr = sdefs.map(def=>lookupGist(def.id).catch(err=>{
+		console.error('xhr error', err);
+	}));
 	Promise.all(pArr).then(data=> {
-		const metadata = data.map(item=>{
+		store = data.map(item=>{
+			// so I need the match form the array I build the promises from... 
+			// if you know a better way
+			// tell me instead of just giving me those
+			// judgy eyes. 
 			const tmp = JSON.parse(item.responseText);
-			const ref = sdefs.shift();
-			return Object.assign(tmp, ref);
+			tmp.matches = sdefs.shift().matches;
+			return tmp;
 		});
-		buildList(metadata);
+		if( store ) buildList(); // handles empty store. 
 	});
 }
 
-function buildList(list) {
+function buildList() {
+	// TODO:: this gives me Cancer, fix it. 
 	gistlist.innerHTML = '';
-	for( const item of list ) {
-		const { description, files, id, owner, matches } = item;
+	for( const item of store ) {
 		const htmlString = `
 			<li>
-				<h4><a href="http://gist.github.com/${id}" target="_blank">${id}</a></h4>
-				<p>${description}</p>
+				<h4><a href="${item.url}" target="_blank">${item.id}</a></h4>
+				<p>${item.description}</p>
 				<p>Files: 
-					${files.join(',')}
+					${Object.keys(item.files).join(',')}
 				</p>
 				<p>Matches: 
-					${matches}
+					${item.matches}
 				</p>
-				<div><small>${owner}</small></div>
+				<div><small><a href="${item.owner.html_url}">${item.owner.login}</a> updated on ${item.updated_at}</small></div>
 			</li>
 		`;
-		// ugh, chrome extensions are stupid and I cannot inline any js. :/
-		// I should just do this all with something sane.. will redo later. it's just DOM right? 
-		// fuck.. 
 		const tmp = document.createElement('div');
 		tmp.innerHTML = htmlString;
 		const li = tmp.children[0];
 		const btnRemove = document.createElement('button');
-		btnRemove.textContent = ' x ';
-		btnRemove.onclick = removeGist.bind(null, id);
+		btnRemove.textContent = ' remove ';
+		btnRemove.onclick = removeGist.bind(null, item.id);
 		li.appendChild(btnRemove);
 		gistlist.appendChild(li);
 	}
@@ -72,7 +87,7 @@ function removeGist(id) {
 }
 
 function lookupGist(id) {
-	return xhr(`https://gist.github.com/${id}.json`);
+	return xhr(`https://api.github.com/gists/${id}`)
 }
 
 function xhr(url, type = 'GET', data = null) {

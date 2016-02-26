@@ -2,26 +2,25 @@ const gistlist = document.getElementById('gistlist');
 
 chrome.tabs.query({active: true, currentWindow: true}, tabs => {
 	chrome.tabs.sendMessage(tabs[0].id, {getActiveGists: true}, res => {
-		console.log(res);
 		buildList(res.data);
 	});
 });
 
-function buildList(list) {
+function buildList(store) {
+	// TODO:: this gives me Cancer, fix it. 
 	gistlist.innerHTML = '';
-	for( const item of list ) {
-		const { description, files, id, owner, matches } = item;
+	for( const item of store ) {
 		const htmlString = `
 			<li>
-				<h4><a href="http://gist.github.com/${id}" target="_blank">${id}</a></h4>
-				<p>${description}</p>
+				<h4><a href="${item.url}" target="_blank">${item.id}</a></h4>
+				<p>${item.description}</p>
 				<p>Files: 
-					${files.join(',')}
+					${Object.keys(item.files).join(',')}
 				</p>
 				<p>Matches: 
-					${matches}
+					${item.matches}
 				</p>
-				<div><small>${owner}</small></div>
+				<div><small><a href="${item.owner.html_url}">${item.owner.login}</a> updated on ${item.updated_at}</small></div>
 			</li>
 		`;
 		gistlist.innerHTML += htmlString;

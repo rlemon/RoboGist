@@ -3,8 +3,10 @@
 let store = []; // currently active gists
 // --------------------
 
+// popup requests data from the page loading it.
 chrome.runtime.onMessage.addListener( (request, sender, done) => {
 	if( request.getActiveGists ) {
+		console.log('done', store);
 		done({data:store});
 	}
 });
@@ -17,8 +19,15 @@ function run(sdefs = []) {
 
 	Promise.all(pArr).then(data=> {
 		store = data.map(item=>{
-			return JSON.parse(item.responseText);
+			// so I need the match form the array I build the promises from... 
+			// if you know a better way
+			// tell me instead of just giving me those
+			// judgy eyes. 
+			const tmp = JSON.parse(item.responseText);
+			tmp.matches = sdefs.shift().matches;
+			return tmp;
 		});
+		console.log(store);
 		runScripts();
 	});
 }
