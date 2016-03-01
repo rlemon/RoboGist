@@ -1,122 +1,125 @@
-// GLOBALS ( ͡° ͜ʖ ͡°)
-// --------------------
-const inputId = document.getElementById('gist-id');
-const inputMatches = document.getElementById('url-matches');
-const btnSave = document.getElementById('add-gist');
-const gistlist = document.getElementById('gist-list');
-let store = []; // currently active gists
-// --------------------
+const gistListElm = document.getElementById('gist-list');
+const addGistElm = document.getElementById('add-gist');
+const overlayElm = document.getElementById('overlay');
+const modalElm = document.getElementById('modal');
+const saveElm = document.getElementById('save');
+const inputName = document.getElementById('gist-name');
+const inputID = document.getElementById('gist-id');
+const inputMatches = document.getElementById('gist-matches');
+const syncKey = 's_defs'; // globals, mmm, ( ͡° ͜ʖ ͡°)
 
-// popup requests data from the page loading it.
-chrome.runtime.onMessage.addListener( (request, sender, done) => {
-	if( request.getActiveGists ) {
-		done({data:store});
+addGistElm.addEventListener('click', showModal);
+saveElm.addEventListener('click', saveGist);
+// delegate trash links because 
+// a) chrome extensions don't allow inline
+// b) I'm too lazy to do the DOM stuff
+//    so I'm using strings...
+//    exactly like I advocate against...
+
+// fuck.
+gistListElm.addEventListener('click', e=> {
+	if( e.target.classList.contains('trash') ) {
+		removeGist(e.target.dataset.id);
 	}
-});
+});	
 
+main();
 
-btnSave.addEventListener('click', _=>{
-	const id = inputId.value;
-	const matches = inputMatches.value;
-	if( !id || !matches ) return;
-
-	getStore('s_defs').then(ret=>{
-		const newData = ret.s_defs || [];
-		newData.push({id, matches});
-		return setStore('s_defs', newData);
-	}).then(data => {
-		run(data);
-	});
-});
-
-getStore('s_defs').then(ret=>run(ret.s_defs));
-
-function run(sdefs = []) {
-	const pArr = sdefs.map(def=>lookupGist(def.id).catch(err=>{
-		console.error('xhr error', err);
-	}));
-	Promise.all(pArr).then(data=> {
-		store = data.map(item=>{
-			// so I need the match form the array I build the promises from... 
-			// if you know a better way
-			// tell me instead of just giving me those
-			// judgy eyes. 
-			const tmp = JSON.parse(item.responseText);
-			tmp.matches = sdefs.shift().matches;
-			return tmp;
-		});
-		if( store ) buildList(); // handles empty store. 
+function main() {
+	getSync().then((syncData = []) => {
+		clearElement(gistListElm);
+		for( const item of syncData ) {
+			// shut up
+			const html = `
+				<tr>
+					<td>
+						<input type="checkbox" ${item.active ? 'checked' : ''} id="checkbox-${item.id}" /><label for="checkbox-${item.id}"></label>
+					</td>
+					<td>${item.name}</td>
+					<td>${item.id}</td>
+					<td>${item.matches}</td>
+					<td>${item.updated || 'unknown'}</td>
+					<td><button class="trash" data-id="${item.id}">&#128465;</button></td>
+				</tr>
+			`;
+			// no really, shut up. it is what it is
+			gistListElm.innerHTML += html;
+		}
 	});
 }
 
-function buildList() {
-	// TODO:: this gives me Cancer, fix it. 
-	gistlist.innerHTML = '';
-	for( const item of store ) {
-		const htmlString = `
-			<li>
-				<h4><a href="${item.url}" target="_blank">${item.id}</a></h4>
-				<p>${item.description}</p>
-				<p>Files: 
-					${Object.keys(item.files).join(',')}
-				</p>
-				<p>Matches: 
-					${item.matches}
-				</p>
-				<div><small><a href="${item.owner.html_url}">${item.owner.login}</a> updated on ${item.updated_at}</small></div>
-			</li>
-		`;
-		const tmp = document.createElement('div');
-		tmp.innerHTML = htmlString;
-		const li = tmp.children[0];
-		const btnRemove = document.createElement('button');
-		btnRemove.textContent = ' remove ';
-		btnRemove.onclick = removeGist.bind(null, item.id);
-		li.appendChild(btnRemove);
-		gistlist.appendChild(li);
-	}
+function saveGist(e) {
+	e.preventDefault();
+	// you can pretty much guarentee anything that I write
+	// that touches the DOM will be ugly.
+	// the DOM is ugly. 
+	// so is your face....
+	const [name, id, matches] = [inputName, inputID, inputMatches].map(elm=>elm.value);
+	getSync().then((data = []) =>{
+		if( data.some(item=>item.id === id) ) {
+			alert('That ID already is in use'); // TODO:: replace with non blocking notification library
+			return -1;
+		}
+		data.push({name,id,matches,active:true,updated:null});
+		return saveSync(data);
+	}).then(data=>{
+		if( data === -1 ) return; // yea.. this is how I exit 
+		hideModal();
+		main();
+	});
+	// I'm sorry
 }
 
 function removeGist(id) {
-	getStore('s_defs').then(ret=>{
-		const newData = ret.s_defs || [];
-		return setStore('s_defs', newData.filter(item=>item.id !== id));
-	}).then(data => {
-		run(data);
-	});
+	// I hate confirms... but I also hate fat fingers. I'll replace with the alert later
+	if( !confirm('Are you sure you want to delete this? This operation cannot be undone.') ) return;
+	// this is much better
+	// because I just filter out the data then run the entire shebang again.
+	getSync().then((data = []) =>{
+		return saveSync(data.filter(item=>item.id!==id));
+	}).then(main);
 }
 
-function lookupGist(id) {
-	return xhr(`https://api.github.com/gists/${id}`)
+// shows the modal
+function showModal() {
+	overlayElm.addEventListener('click', hideModal);
+	modalElm.querySelector('.close').addEventListener('click', hideModal);
+	overlayElm.hidden = modalElm.hidden = false;
+}
+// hides the modal and clears values from the inputs.
+function hideModal() {
+	overlayElm.removeEventListener('click', hideModal);
+	modalElm.querySelector('.close').removeEventListener('click', hideModal);
+	overlayElm.hidden = modalElm.hidden = true;
+	[inputName, inputID, inputMatches].map(elm=>elm.value='');
+}
+// bro, do you even DOM? 
+// I don't.. so I made these
+// and then still used html strings.
+function makeElement(type, properties) {
+	const tmp = document.createElement(type);
+	return Object.assign(tmp, properties);
+}
+function clearElement(element) {
+	while(element.hasChildNodes()) {
+		element.removeChild(element.lastChild);
+	}
 }
 
-function xhr(url, type = 'GET', data = null) {
-	return new Promise((resolve, reject) => {
-		const hr = new XMLHttpRequest();
-		hr.open(type, url, true);
-		hr.onload = _ => resolve(hr);
-		hr.onerror = reject;
-		hr.send(data)
+// these titles are misleading, they are not a synchronous function
+// they get data from the 'Sync' storage container and return a promise. 
+// please don't judge me with those judgy eyes. 
+// ...
+// ... I said stop it!
+function saveSync(data) {
+	const tmp = {};
+	tmp[syncKey] = data;
+	return new Promise( (resolve, reject) => {
+		chrome.storage.sync.set(tmp, _ => resolve(data));
 	});
 }
-
-function getStore(itemName) {
-	return new Promise((resolve, reject) => {
-		try {
-			chrome.storage.sync.get(itemName, resolve);
-		} catch(e) {
-			reject(e);
-		}
-	});
-}
-function setStore(name, items) {
-	const obj = {};
-	obj[name] = items;
-	return new Promise((resolve, reject) => {
-		try {
-			chrome.storage.sync.set(obj, _ => resolve(items));
-		} catch(e) {
-			reject(e);
-		}
+function getSync() {
+	return new Promise( (resolve, reject) => {
+		chrome.storage.sync.get(syncKey, ret => {resolve(ret[syncKey])});
 	});
 }

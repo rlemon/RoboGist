@@ -1,54 +1,31 @@
-// GLOBALS ( ͡° ͜ʖ ͡°)
-// --------------------
-let store = []; // currently active gists
-// --------------------
+let dataStore = []; // holds the sync store
+let gistStore = []; // holds the gist metadata and code
+const syncKey = 's_defs'; // globals, mmm, ( ͡° ͜ʖ ͡°)
 
-// popup requests data from the page loading it.
-chrome.runtime.onMessage.addListener( (request, sender, done) => {
-	if( request.getActiveGists ) {
-		console.log('done', store);
-		done({data:store});
-	}
-});
+main();
 
-getStore('s_defs').then(ret=>run(ret.s_defs));
-
-function run(sdefs = []) {
-	const pArr = sdefs.filter(def=>new RegExp(def.matches).test(location.href))
-					.map(def=>lookupGist(def.id));
-
-	Promise.all(pArr).then(data=> {
-		store = data.map(item=>{
-			// so I need the match form the array I build the promises from... 
-			// if you know a better way
-			// tell me instead of just giving me those
-			// judgy eyes. 
-			const tmp = JSON.parse(item.responseText);
-			tmp.matches = sdefs.shift().matches;
-			return tmp;
-		});
-		console.log(store);
-		runScripts();
-	});
-}
-
-function runScripts() {
-	for( const script of store ) {
-		for( const fileName in script.files ) {
-			const maybeext = fileName.split('.').pop().toLowerCase()
-			if( maybeext === 'js') {
-				inject('script',script.files[fileName].content);
-			} else if (maybeext === 'css' ) {
-				inject('style',script.files[fileName].content, true);
-			} else {
-				console.error('script contains invalid file types.', fileName);
-			}
+function main() {
+	getSync().then(data => dataStore = data).then(_=>{
+		// gets only the matched gists which are currently active
+		const arr = dataStore.filter(item=>item.active&&new RegExp(item.matches).test(location.href));
+		// now get the metadata
+		for( const item of arr ) {
+			xhr(`https://api.github.com/gists/${item.id}`).then(hr => {
+				const metadata = JSON.parse(hr.responseText);
+				if( new Date(item.updated) < new Date(metadata.updated_at) ) { // we've been updated
+					
+				}
+			})
 		}
-	}
-}
+		// check the updated
 
-function lookupGist(id) {
-	return xhr(`https://api.github.com/gists/${id}`);
+		// set inactive if updated recently
+
+		// update the records
+
+		// inject the active scripts.
+
+	});
 }
 
 function xhr(url, type = 'GET', data = null) {
@@ -61,31 +38,25 @@ function xhr(url, type = 'GET', data = null) {
 	});
 }
 
-function getStore(itemName) {
-	return new Promise((resolve, reject) => {
-		try {
-			chrome.storage.sync.get(itemName, resolve);
-		} catch(e) {
-			reject(e);
-		}
-	});
-}
-function setStore(name, items) {
-	const obj = {};
-	obj[name] = items;
-	return new Promise((resolve, reject) => {
-		try {
-			chrome.storage.sync.set(obj, _ => resolve(items));
-		} catch(e) {
-			reject(e);
-		}
-	});
-}
 function inject(type, content, isHead = false) {
- 	const s = document.createElement(type);
- 	if( type === 'js' ) { // TODO: add wrap options
- 		contnet = '(function() {' + content + '}())'
- 	}
- 	s.textContent = content;
- 	document[isHead?'head':'body'].appendChild(s);
+	const s = document.createElement(type);
+	if( type === 'js' ) { // TODO: add wrap options
+		contnet = '(function() {' + content + '}())'
+	}
+	s.textContent = content;
+	document[isHead?'head':'body'].appendChild(s);
+}
+
+
+function saveSync(data) {
+	const tmp = {};
+	tmp[syncKey] = data;
+	return new Promise( (resolve, reject) => {
+		chrome.storage.sync.set(tmp, _ => resolve(data));
+	});
+}
+function getSync() {
+	return new Promise( (resolve, reject) => {
+		chrome.storage.sync.get(syncKey, ret => {resolve(ret[syncKey])});
+	});
 }

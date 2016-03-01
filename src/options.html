@@ -1,15 +1,70 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title></title>
+<title>RoboGist options</title>
+<link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-<div><label>Gist ID: <input type="text" id="gist-id"></label></div>
-<div><label>Matches: <input type="text" id="url-matches"></label></div>
-<button id="add-gist">Add Gist</button>
-<div>
-	<h3> Current Gists </h3>
-	<ul id="gist-list"></ul>
+<div class="wrapper">
+	<!-- TODO:: stop hosting on imgur -->
+	<img src="http://i.imgur.com/4fV2tTL.png" class="logo" alt="Robo Gist"/>
+	<div class="inner-wrapper">
+		<div class="header">
+			 Installed Gists
+			<div class="menu">
+				<button class="add" id="add-gist" title="Add New">+</button>
+			</div>
+		</div>
+		<div class="table">
+			<table>
+			<thead>
+			<tr>
+				<th title="is Active">
+					Active
+				</th>
+				<th>
+					Name
+				</th>
+				<th>
+					ID
+				</th>
+				<th>
+					Matches
+				</th>
+				<th>
+					Last Updated
+				</th>
+				<th></th>
+			</tr>
+			</thead>
+			<tbody id="gist-list">
+			<!-- populated by js -->
+			</tbody>
+			</table>
+		</div>
+	</div>
+	<div class="overlay" id="overlay" hidden>
+	</div>
+	<div class="form" id="modal" hidden>
+		<button class="close">x</button>
+		<h3> Add New Gist </h3>
+		<div class="control">
+			<label for="gist-name">Gist Name</label>
+			<input id="gist-name" type="text"/>
+		</div>
+		<div class="control">
+			<label for="gist-id">Gist ID</label>
+			<input id="gist-id" type="text"/>
+		</div>
+		<div class="control">
+			<label for="gist-matches">Matching Pattern</label>
+			<input id="gist-matches" type="text"/>
+		</div>
+		<div class="control">
+			<button class="save" id="save">
+			save </button>
+		</div>
+	</div>
 </div>
 <script src="options.js"></script>
 </body>
