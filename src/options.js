@@ -21,7 +21,15 @@ gistListElm.addEventListener('click', e=> {
 	if( e.target.classList.contains('trash') ) {
 		removeGist(e.target.dataset.id);
 	}
+	// delegate checkbox 'activates' 
+	if( e.target.classList.contains('checkbox') ) {
+		toggleGist(e.target.previousElementSibling.dataset.id);
+	}
 });	
+
+// tell the background page we've seen the changes. resets the icon.
+// this also happens when we open the popup
+chrome.runtime.sendMessage({'gistChanged':'no'})
 
 main();
 
@@ -30,10 +38,14 @@ function main() {
 		clearElement(gistListElm);
 		for( const item of syncData ) {
 			// shut up
+			if( !item ) {
+				console.log(item, syncData, 'the fuck');
+				continue;
+			}
 			const html = `
 				<tr>
 					<td>
-						<input type="checkbox" ${item.active ? 'checked' : ''} id="checkbox-${item.id}" /><label for="checkbox-${item.id}"></label>
+						<input type="checkbox" ${item.active ? 'checked' : ''} id="checkbox-${item.id}" data-id="${item.id}" /><label class="checkbox" for="checkbox-${item.id}"></label>
 					</td>
 					<td>${item.name}</td>
 					<td>${item.id}</td>
@@ -80,6 +92,18 @@ function removeGist(id) {
 	}).then(main);
 }
 
+function toggleGist(id) {
+	getSync().then((data = []) =>{
+		data = data.map(item=>{
+			if( item.id === id ) {
+				item.active = !item.active;
+			}
+			return item;
+		});
+		return saveSync(data);
+	}).then(main);
+}
+
 // shows the modal
 function showModal() {
 	overlayElm.addEventListener('click', hideModal);
@@ -111,7 +135,7 @@ function clearElement(element) {
 // please don't judge me with those judgy eyes. 
 // ...
 // ... I said stop it!
-function saveSync(data) {
+function saveSync(data = []) {
 	const tmp = {};
 	tmp[syncKey] = data;
 	return new Promise( (resolve, reject) => {
