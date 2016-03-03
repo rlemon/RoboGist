@@ -37,9 +37,8 @@ function main() {
 	getSync().then((syncData = []) => {
 		clearElement(gistListElm);
 		for( const item of syncData ) {
-			// shut up
+			// shut up, this should never hit
 			if( !item ) {
-				console.log(item, syncData, 'the fuck');
 				continue;
 			}
 			const html = `
@@ -66,7 +65,7 @@ function saveGist(e) {
 	// that touches the DOM will be ugly.
 	// the DOM is ugly. 
 	// so is your face....
-	const [name, id, matches] = [inputName, inputID, inputMatches].map(elm=>elm.value);
+	const [name, id, matches] = [inputName, inputID, inputMatches].map(elm=>elm.value.trim());
 	getSync().then((data = []) =>{
 		if( data.some(item=>item.id === id) ) {
 			alert('That ID already is in use'); // TODO:: replace with non blocking notification library

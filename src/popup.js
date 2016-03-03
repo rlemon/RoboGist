@@ -1,4 +1,5 @@
 const gistListElm = document.getElementById('gist-list');
+const optionsPageBtn = document.getElementById('open-options');
 const syncKey = 's_defs'; // globals, mmm, ( ͡° ͜ʖ ͡°)
 
 chrome.runtime.sendMessage({'gistChanged':'no'})
@@ -9,6 +10,10 @@ gistListElm.addEventListener('click', e=> {
 		toggleGist(e.target.previousElementSibling.dataset.id);
 	}
 });	
+
+optionsPageBtn.addEventListener('click', e=>{
+	chrome.runtime.openOptionsPage(window.close.bind(window));
+});
 
 main();
 
