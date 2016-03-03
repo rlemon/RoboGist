@@ -4,7 +4,9 @@
   "description": "chrome snippet manager",
   "main": "gulpfile.js",
   "scripts": {
-    "build": "babel ./src --out-dir ./build && rsync -av --exclude '*.js' ./src/ ./build/"
+    "dev-build": "node versioner.js && npm run-script build",
+    "build": "babel ./src --out-dir ./build &&  rsync -av --exclude '*.js' ./src/ ./build/",
+    "package": "npm run-script build && zip -r ./build/webstore-package.zip ./build"
   },
   "author": "rlemon",
   "license": "",
