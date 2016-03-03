@@ -47,7 +47,7 @@ function main() {
 						<input type="checkbox" ${item.active ? 'checked' : ''} id="checkbox-${item.id}" data-id="${item.id}" /><label class="checkbox" for="checkbox-${item.id}"></label>
 					</td>
 					<td>${item.name}</td>
-					<td>${item.id}</td>
+					<td><a href="http://gist.github.com/${item.id}" target="_blank">${item.id}</a></td>
 					<td>${item.matches}</td>
 					<td>${new Date(item.updated).toLocaleString() || 'unknown'}</td>
 					<td><button class="trash" data-id="${item.id}">&#128465;</button></td>
@@ -71,7 +71,7 @@ function saveGist(e) {
 			alert('That ID already is in use'); // TODO:: replace with non blocking notification library
 			return -1;
 		}
-		data.push({name,id,matches,active:true,updated:null});
+		data.push({name,id,matches,active:true,updated:Date.now()});
 		return saveSync(data);
 	}).then(data=>{
 		if( data === -1 ) return; // yea.. this is how I exit 

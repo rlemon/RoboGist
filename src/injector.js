@@ -10,34 +10,27 @@ function main() {
 		// now get the metadata
 		for( const item of arr ) { // we could retain the order of inclusion, 
 			//but I do not allow re-ordering right now.. so once I do look into that.
-			xhr(`https://api.github.com/gists/${item.id}`).then(hr => {
-				const metadata = JSON.parse(hr.responseText);
-				if( new Date(item.updated) < new Date(metadata.updated_at) ) { // we've been updated
-					// deactivate item and set new updated time
-					item.active = false;
-					item.updated = metadata.updated_at;
-					// notify client
-					return saveSync().then(_=>chrome.runtime.sendMessage({'gistChanged':'yes'}));
-				}
-				// item is not recently updated. inject if active
+			xhr(`https://api.github.com/gists/${item.id}`).then(parseMetaData.bind(null, item)).then(metadata=>{
 				if( item.active ) {
-					// loop over files and inject accordingly. 
-					for( const fileName in metadata.files ) {
-						// if you try to fool the system you only hurt yourself. 
-						const maybeExtension = fileName.split('.').pop().toLowerCase();
-						console.log('injecting', fileName);
-						if( maybeExtension === 'js' ) {
-							inject('script', metadata.files[fileName].content, true);
-						} else if (maybeExtension === 'css' ) {
-							inject('style', metadata.files[fileName].content);
-						} else {
-							console.error('RoboGist encountered an error', `file ${fileName} is not JavaScript or CSS. Please only include JavaScript or CSS files for injection.`);
-						}
-					}
+					injector(metadata.files);
 				}
 			});
 		}
 	});
+}
+
+function parseMetaData(item, hr) {
+	const data = JSON.parse(hr.responseText);
+	const currentTimestamp = new Date(item.updated);
+	const gistTimestamp = new Date(data.updated_at);
+	if( currentTimestamp !== gistTimestamp ) {
+		item.updated = gistTimestamp;
+		if(gistTimestamp > currentTimestamp) {
+			item.active = false;
+			chrome.runtime.sendMessage({'gistChanged':'yes'}); // notify the popup change.
+		}
+		return saveSync().then(_=>data); // save sync then return the metadata
+	}
 }
 
 function xhr(url, type = 'GET', data = null) {
@@ -48,6 +41,20 @@ function xhr(url, type = 'GET', data = null) {
 		hr.onerror = reject;
 		hr.send(data)
 	});
+}
+
+function injector(files) {
+	for( const fileName in files ) {
+		const maybeExtension = fileName.split('.').pop().toLowerCase();
+		console.log('injecting', fileName);
+		if( maybeExtension === 'js' ) {
+			inject('script', files[fileName].content, true);
+		} else if (maybeExtension === 'css' ) {
+			inject('style', files[fileName].content);
+		} else {
+			console.error('RoboGist encountered an error', `file ${fileName} is not JavaScript or CSS. Please only include JavaScript or CSS files for injection.`);
+		}
+	}
 }
 
 function inject(type, content, isHead = false) {
