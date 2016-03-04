@@ -71,14 +71,33 @@ function saveGist(e) {
 			alert('That ID already is in use'); // TODO:: replace with non blocking notification library
 			return -1;
 		}
-		data.push({name,id,matches,active:true,updated:Date.now()});
-		return saveSync(data);
+		return checkDate(id).then(date=> {
+			data.push({name,id,matches,active:true,updated:date});
+			return saveSync(data);
+		});
 	}).then(data=>{
 		if( data === -1 ) return; // yea.. this is how I exit 
 		hideModal();
 		main();
 	});
 	// I'm sorry
+}
+
+function checkDate(id) {
+	return xhr(`https://api.github.com/gists/${id}/commits`).then(hr=>{
+		const data = JSON.parse(hr.responseText);
+		return Math.max.apply(Math, data.map(rev=>new Date(rev.committed_at).getTime()));
+	});
+}
+
+function xhr(url, type = 'GET', data = null) {
+	return new Promise((resolve, reject) => {
+		const hr = new XMLHttpRequest();
+		hr.open(type, url, true);
+		hr.onload = _ => resolve(hr);
+		hr.onerror = reject;
+		hr.send(data)
+	});
 }
 
 function removeGist(id) {

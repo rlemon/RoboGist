@@ -8,9 +8,10 @@ function main() {
 		// gets only the matched gists which are currently active
 		const arr = dataStore.filter(item=>item.active&&new RegExp(item.matches).test(location.href));
 		// now get the metadata
-
+		// the nested .then is because I cannot reasonably figure out how to pass on the arr values
+		// inside of the resolved promise without abusing scoping. This means I must introduce an anti pattern and
+		// levels of indentation. @Florian, before you bitch about this maybe you could instead TELL ME HOW TO FIX IT YOU FRENCH BASTARD! 
 		const parr = arr.map(item=>xhr(`https://api.github.com/gists/${item.id}`));
-
 		Promise.all(parr).then(hrs => {
 			const datas = hrs.map(hr=>JSON.parse(hr.responseText));
 			datas.forEach((data, index) => {
