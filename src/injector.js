@@ -8,29 +8,26 @@ function main() {
 		// gets only the matched gists which are currently active
 		const arr = dataStore.filter(item=>item.active&&new RegExp(item.matches).test(location.href));
 		// now get the metadata
-		for( const item of arr ) { // we could retain the order of inclusion, 
-			//but I do not allow re-ordering right now.. so once I do look into that.
-			xhr(`https://api.github.com/gists/${item.id}`).then(parseMetaData.bind(null, item)).then(metadata=>{
-				if( item.active ) {
-					injector(metadata.files);
-				}
-			});
-		}
-	});
-}
 
-function parseMetaData(item, hr) {
-	const data = JSON.parse(hr.responseText);
-	const currentTimestamp = new Date(Number(item.updated));
-	const gistTimestamp = new Date(data.updated_at).getTime();
-	if( currentTimestamp !== gistTimestamp ) {
-		item.updated = gistTimestamp;
-		if(gistTimestamp > currentTimestamp) {
-			item.active = false;
-			chrome.runtime.sendMessage({'gistChanged':'yes'}); // notify the popup change.
-		}
-		return saveSync().then(_=>data); // save sync then return the metadata
-	}
+		const parr = arr.map(item=>xhr(`https://api.github.com/gists/${item.id}`));
+
+		Promise.all(parr).then(hrs => {
+			const datas = hrs.map(hr=>JSON.parse(hr.responseText));
+			datas.forEach((data, index) => {
+				const myTime = new Date(Number(arr[index].updated));
+				const gistTime = new Date(data.updated_at).getTime();
+				if( myTime !== gistTime ) {
+					arr[index].updated = gistTime;
+					if( gistTime > myTime ) {
+						arr[index].active = false;
+						 return chrome.runtime.sendMessage({'gistChanged':'yes'}); 
+					}
+				}
+				injector(data.files);
+			});
+		});
+		return saveSync();
+	});
 }
 
 function xhr(url, type = 'GET', data = null) {
@@ -46,13 +43,14 @@ function xhr(url, type = 'GET', data = null) {
 function injector(files) {
 	for( const fileName in files ) {
 		const maybeExtension = fileName.split('.').pop().toLowerCase();
-		console.log('injecting', fileName);
+		console.log('RoboGist is loading', fileName);
 		if( maybeExtension === 'js' ) {
 			inject('script', files[fileName].content, true);
 		} else if (maybeExtension === 'css' ) {
 			inject('style', files[fileName].content);
 		} else {
-			console.error('RoboGist encountered an error', `file ${fileName} is not JavaScript or CSS. Please only include JavaScript or CSS files for injection.`);
+			console.error('RoboGist encountered an error', 
+				`file ${fileName} is not JavaScript or CSS. Please only include JavaScript or CSS files for injection.`);
 		}
 	}
 }
