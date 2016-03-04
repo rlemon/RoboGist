@@ -21,8 +21,8 @@ function main() {
 
 function parseMetaData(item, hr) {
 	const data = JSON.parse(hr.responseText);
-	const currentTimestamp = new Date(item.updated);
-	const gistTimestamp = new Date(data.updated_at);
+	const currentTimestamp = new Date(Number(item.updated));
+	const gistTimestamp = new Date(data.updated_at).getTime();
 	if( currentTimestamp !== gistTimestamp ) {
 		item.updated = gistTimestamp;
 		if(gistTimestamp > currentTimestamp) {

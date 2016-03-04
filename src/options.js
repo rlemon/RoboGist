@@ -49,7 +49,7 @@ function main() {
 					<td>${item.name}</td>
 					<td><a href="http://gist.github.com/${item.id}" target="_blank">${item.id}</a></td>
 					<td>${item.matches}</td>
-					<td>${new Date(item.updated).toLocaleString() || 'unknown'}</td>
+					<td>${new Date(Number(item.updated)).toLocaleString() || 'unknown'}</td>
 					<td><button class="trash" data-id="${item.id}">&#128465;</button></td>
 				</tr>
 			`;
