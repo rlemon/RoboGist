@@ -12,7 +12,7 @@ getSync().then(store => {
 			if( gistObject.updated_at !== refObject.updated ) {
 				chrome.runtime.sendMessage({'gistChanged':'yes'}); 
 				console.log(`${refObject.name} has been updated. please re-activate it from the options page.`)
-				Object.assign(list.find(item => item.id === refObject.id), {updated: gistObject.updated_at, active: false});
+				Object.assign(list.find(item => item.id === refObject.id), {updated: gistObject.updated_at, active: false, hasUpdated: true});
 				return saveSync({list});
 			}
 			injector(gistObject.files, refObject.name);

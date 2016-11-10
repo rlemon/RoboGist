@@ -9,7 +9,7 @@ getSync().then(store => {
 		const listable = list.filter(item => new RegExp(item.matches).test(tabs[0].url));
 		for( const item of listable ) {
 			gistListElm.innerHTML += `
-				<tr>
+				<tr${item.hasUpdated ? ' class="hasUpdated"' : ''}>
 					<td>
 						<input type="checkbox" ${item.active ? 'checked' : ''} disabled id="checkbox-${item.id}" data-id="${item.id}" /><label class="checkbox" for="checkbox-${item.id}" title="toggle active from options page"></label>
 					</td>

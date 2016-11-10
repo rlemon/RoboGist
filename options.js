@@ -35,7 +35,7 @@ function buildlist() {
 		const {list} = store;
 		for( const item of list ) {
 			gistListElm.innerHTML += `
-				<tr>
+				<tr${item.hasUpdated ? ' class="hasUpdated"' : ''}>
 					<td>
 						<input type="checkbox" ${item.active ? 'checked' : ''} id="checkbox-${item.id}" data-id="${item.id}" /><label class="checkbox" for="checkbox-${item.id}" title="toggle active"></label>
 					</td>
@@ -55,7 +55,10 @@ function toggleGist(id) {
 		const {list} = store;
 		// maybe I should be pulling a new date on this action if toggling on??
 		return saveSync({list: list.map(item => {
-			if( item.id === id ) item.active = !item.active;
+			if( item.id === id ) {
+				item.active = !item.active;
+				item.hasUpdated = false;
+			}
 			return item;
 		})});
 	}).then(buildlist);
@@ -76,7 +79,7 @@ function reloadGist(id) {
 		return xhr(`https://api.github.com/gists/${id}`).then(hr => {
 			const data = JSON.parse(hr.responseText);
 			const updated = data.updated_at;
-			Object.assign(list.find(item => item.id === id ), {updated});
+			Object.assign(list.find(item => item.id === id ), {updated, hasUpdated: false});
 			return saveSync({list})
 		});
 	}).then(buildlist);
@@ -94,8 +97,7 @@ function saveGist(event) {
 		return xhr(`https://api.github.com/gists/${id}`).then(hr => {
 			const data = JSON.parse(hr.responseText);
 			const updated = data.updated_at;
-			console.log( name, id, matches, updated ); // all the info we need, assume active on add
-			list.push({name, id, matches, updated, active: true });
+			list.push({name, id, matches, updated, active: true, hasUpdated: false });
 			return saveSync({list})
 		});
 	}).then(hideModal).then(buildlist);

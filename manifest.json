@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Robo Gist",
-  "description": "manager to inject gist files into the page",
+  "description": "userscript/userstyle manager based on gist",
   "version": "0.2.0",
   "browser_action": {
     "default_icon": "icon.png",
