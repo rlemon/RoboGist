@@ -23,7 +23,7 @@ getSync().then(store => {
 function injector(files, name) {
 	for( const fileName in files ) {
 		const maybeExtension = fileName.split('.').pop().toLowerCase();
-		console.log(`loading ${filename} from "${name}"`);
+		console.log(`loading ${fileName} from "${name}"`);
 		if( maybeExtension === 'js' ) {
 			inject('script', files[fileName].content, true);
 		} else if (maybeExtension === 'css' ) {
