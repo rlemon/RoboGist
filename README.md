@@ -11,10 +11,4 @@ RoboGist takes a gist ID and a [JavaScript Regular Expression](https://developer
 **Note!** if you see this icon: <img src="http://i.imgur.com/Fs2WtqJ.png" />   
 that means a gist has one or more files which have been altered since you last activated it. You will have to open the popup page or the options page to re-enable it.  
     
-As of right now active gists do not inject themselves on-the-fly, they need a page load to do so. Expect this to change.    
-    
-###Development Installation  
-1) download the source and `cd` to the directory    
-2) run `npm install`    
-3) run `npm run-script build`     
-4) open `chrome://extensions` and load the unpackaged extension found in the newly created `/build` directory.     
+As of right now active gists do not inject themselves on-the-fly, they need a page load to do so. Expect this to change.   

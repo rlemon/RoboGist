@@ -31,14 +31,9 @@ body {
   font-size: 14px;
 }
 
-body {
-  background-image: radial-gradient(mintcream 0%, gray 100%);
-  padding-top: 35px;
-}
-
 .wrapper {
-  width: 90%;
-  height: 90%;
+  width: 480px;
+  height: 340px;
   margin: 0 auto;
   border-radius: 4px;
   border: solid 1px rgba(0, 0, 0, 0.6);
@@ -54,7 +49,7 @@ body {
 
 .logo {
   display: block;
-  width: 254px;
+  width: 128px;
   margin: 10px auto;
 }
 
@@ -138,7 +133,7 @@ body {
 }
 [type="checkbox"] + label {
   display: inline-block;
-  cursor: pointer;
+  cursor: not-allowed;
   height: 14px;
   width: 14px;
   background: white;
@@ -157,87 +152,4 @@ body {
   top: -3px;
   left: -4px;
   content: '✓';
-}
-
-.trash {
-	outline: none;
-	border: none;
-	background-color: transparent;
-	margin: 0;
-	padding: 0;
-	font-size: 1.3rem;
-	font-weight: 400;
-	cursor: pointer;
-}
-
-/* modal */
-
-.overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%; 
-  width: 100%; 
-  background-color: rgba(255, 255, 255, 0.5);
-}
-.form {
-  position: absolute;
-  background-color: #f3f3f3;
-  width: 340px;
-  height: 180px;
-  top: calc(50% - 90px);
-  left: calc(50% - 170px);
-  padding: 20px;
-  border: 1px solid rgba(0,0,0,0.6);
-  box-shadow: 0 0 10px rgba(0, 0, 0, .8);
-}
-
-.form h3 {
-  margin: 0;
-  padding: 0 0 12px;
-}
-
-.form input[type="text"] {
-  background: transparent;
-  border-bottom: 1px solid rgba(0,0,0,0.4);
-  padding: 1px;
-}
-
-.form input[type="text"]:focus {
-  border-bottom: 1px solid rgba(0,0,0,0.4);
-}
-.form input[type="text"]:focus::-webkit-input-placeholder  {
-  color: transparent;
-}
-
-.form .save {
-  margin-top: 16px;
-  background-color: #FA4940;
-  color: #f5f5f5;
-  padding: 4px 7px;
-  border-radius: 2px;
-}
-
-.form .close {
-  position: absolute;
-  top: -9px;
-  right: -9px;
-  height: 18px;
-  width: 18px;
-  border-radius: 50%;
-  background-color: #000;
-  color: #f5f5f5;
-  cursor: pointer;
-}
-
-.form .control {
-  clear: both;
-  padding: 6px;
-}
-.form .control label {
-  float: left;
-}
-.form .control input,
-.form .control button {
-  float: right;
 }

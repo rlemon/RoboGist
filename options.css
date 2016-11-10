@@ -1,11 +1,11 @@
 /*
-	SUPER AWESOME STYLESHEET!!
-	VERSION 36547.9
-	AUTHOR: rlemon with a dash of dugger;
-	
-	If anyone knows of a tool to clean up my inconsistent 
-	(or you wanna do it by hand) units and styles please raise
-	an issue. Thanks.
+  SUPER AWESOME STYLESHEET!!
+  VERSION 36547.9
+  AUTHOR: rlemon with a dash of dugger;
+  
+  If anyone knows of a tool to clean up my inconsistent 
+  (or you wanna do it by hand) units and styles please raise
+  an issue. Thanks.
 
 */
 @import url(https://fonts.googleapis.com/css?family=Roboto:300,400,800);
@@ -31,9 +31,14 @@ body {
   font-size: 14px;
 }
 
+body {
+  background-image: radial-gradient(mintcream 0%, gray 100%);
+  padding-top: 35px;
+}
+
 .wrapper {
-  width: 480px;
-  height: 340px;
+  width: 90%;
+  height: 90%;
   margin: 0 auto;
   border-radius: 4px;
   border: solid 1px rgba(0, 0, 0, 0.6);
@@ -49,7 +54,7 @@ body {
 
 .logo {
   display: block;
-  width: 128px;
+  width: 254px;
   margin: 10px auto;
 }
 
@@ -108,7 +113,7 @@ body {
   border-bottom: 1px solid #ccc;
 }
 .table tbody {
-	position: relative;
+  position: relative;
 }
 .table tbody tr:hover td {
   background-color: #fffde0;
@@ -119,12 +124,12 @@ body {
 }
 
 .table tbody:empty::after {
-	position: absolute;
-	left: 0;
-	right: 0;
-	padding-top: 64px;
-	content: 'there is nothing to see here.';
-	text-align: center;
+  position: absolute;
+  left: 0;
+  right: 0;
+  padding-top: 64px;
+  content: 'there is nothing to see here.';
+  text-align: center;
 }
 
 [type="checkbox"]:checked,
@@ -154,15 +159,16 @@ body {
   content: '✓';
 }
 
+.reload, 
 .trash {
-	outline: none;
-	border: none;
-	background-color: transparent;
-	margin: 0;
-	padding: 0;
-	font-size: 1.3rem;
-	font-weight: 400;
-	cursor: pointer;
+  outline: none;
+  border: none;
+  background-color: transparent;
+  margin: 0;
+  padding: 0;
+  font-size: 1.3rem;
+  font-weight: 400;
+  cursor: pointer;
 }
 
 /* modal */
@@ -193,12 +199,16 @@ body {
 }
 
 .form input[type="text"] {
-  border: 1px solid rgba(0,0,0,0.4);
+  background: transparent;
+  border-bottom: 1px solid rgba(0,0,0,0.4);
   padding: 1px;
 }
 
 .form input[type="text"]:focus {
-  border: 1px solid rgba(0,0,0,0.8);
+  border-bottom: 1px solid rgba(0,0,0,0.4);
+}
+.form input[type="text"]:focus::-webkit-input-placeholder  {
+  color: transparent;
 }
 
 .form .save {
