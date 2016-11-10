@@ -114,7 +114,7 @@ body {
   background-color: #fffde0;
 }
 .table tbody tr.hasUpdated td {
-  background-color: #bf5b40;
+  background-color: #ff9191;
 }
 .table tbody tr:nth-child(even) {
   background-color: #ededed;

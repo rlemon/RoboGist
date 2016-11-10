@@ -21,9 +21,10 @@ getSync().then(store => {
 });
 
 function injector(files, name) {
+	console.groupCollapsed(`%cRoboGist -> ${name}`, 'color: #FF4136; font-size: normal;')
 	for( const fileName in files ) {
 		const maybeExtension = fileName.split('.').pop().toLowerCase();
-		console.log(`loading ${fileName} from "${name}"`);
+		console.log(`load ${fileName}`);
 		if( maybeExtension === 'js' ) {
 			inject('script', files[fileName].content, true);
 		} else if (maybeExtension === 'css' ) {
@@ -33,6 +34,7 @@ function injector(files, name) {
 				`file ${fileName} is not JavaScript or CSS. Please only include JavaScript or CSS files for injection.`);
 		}
 	}
+	console.groupEnd();
 }
 
 function inject(type, content, isHead = false) {

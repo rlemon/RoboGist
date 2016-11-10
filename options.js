@@ -25,6 +25,7 @@ gistListElm.addEventListener('click', event => {
 });
 
 window.onload = buildlist;
+document.addEventListener('visibilitychange', e => !document.hidden && buildlist());
 chrome.runtime.sendMessage({'gistChanged':'no'});
 
 function buildlist() {

@@ -64,6 +64,7 @@ body {
   padding: 16px;
   overflow-y: auto;
   box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.25);
+  position: relative;
 }
 
 .header {
@@ -115,12 +116,16 @@ body {
 .table tbody {
   position: relative;
 }
+.table tbody td {
+  transition: background-color 120ms ease-out;
+  white-space: nowrap;
+}
 .table tbody tr:hover td {
   background-color: #fffde0;
 }
 
 .table tbody tr.hasUpdated td {
-  background-color: #bf5b40;
+  background-color: #ff9191;
 }
 
 .table tbody tr:nth-child(even) {
@@ -135,7 +140,10 @@ body {
   content: 'there is nothing to see here.';
   text-align: center;
 }
-
+.inner-wrapper .footnote {
+  position: absolute;
+  bottom: 4px;
+}
 [type="checkbox"]:checked,
 [type="checkbox"]:not(:checked) {
   display: none;
@@ -162,7 +170,14 @@ body {
   left: -4px;
   content: '\2713';
 }
-
+.table tbody tr.hasUpdated [type="checkbox"] + label::after {
+  position: absolute;
+  top: -9px;
+  right: -26px;
+  font-size: 26px;
+  color: #FA4940;
+  content: '\26A0';
+}
 .reload, 
 .trash {
   outline: none;
