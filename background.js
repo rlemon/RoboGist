@@ -22,7 +22,7 @@ chrome.runtime.onMessageExternal.addListener((request, sender, callback) => {
 		});
 	} else {
 		const {id, name, matches} = request.gistInformation;
-		saveGist(name, id, matches);
+		saveGist(name, id, matches); // seriously.. what in the good fuck
 		callback({message: 'done'})
 	}
 	return true;
