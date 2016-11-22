@@ -33,6 +33,7 @@
   "permissions": [
     "activeTab",
     "storage",
+    "tabs",
     "https://gist.githubusercontent.com/*"
   ]
 }
