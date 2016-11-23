@@ -12,24 +12,9 @@ chrome.runtime.onMessage.addListener((request, sender, done) => {
 	}
 });
 
-chrome.tabs.onActivated.addListener(_ => {
-	chrome.tabs.query({
-		active: true,
-		lastFocusedWindow: true
-	}, tabs => {
-		getSync().then(store => {
-			const {list} = store;
-			const [tab] = tabs;
-			const {url} = tab;
-			const usable = list.filter(item => {
-				return item.active && new RegExp(item.matches).test(url);
-			});
-			chrome.browserAction.setBadgeText({
-				text: usable.length.toString()
-			});
-		});
-	})
-});
+chrome.tabs.onActivated.addListener(updateTabCounter);
+
+chrome.tabs.onUpdated.addListener(updateTabCounter);
 
 chrome.runtime.onMessageExternal.addListener((request, sender, callback) => {
 	if( 'checkInstalled' in request ) {
@@ -46,6 +31,25 @@ chrome.runtime.onMessageExternal.addListener((request, sender, callback) => {
 	}
 	return true;
 });
+
+function updateTabCounter() {
+	chrome.tabs.query({
+		active: true,
+		lastFocusedWindow: true
+	}, tabs => {
+		getSync().then(store => {
+			const {list} = store;
+			const [tab] = tabs;
+			const {url} = tab;
+			const usable = list.filter(item => {
+				return item.active && new RegExp(item.matches).test(url);
+			});
+			chrome.browserAction.setBadgeText({
+				text: usable.length.toString()
+			});
+		});
+	});
+}
 
 function saveGist(name, id, matches) {
 	getSync().then(store => {
